@@ -6,6 +6,10 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
+    "paths": {
+      "@src/*": ["./src/*"],
+      "@modules/*": ["./src/modules/*"],
+    },
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
