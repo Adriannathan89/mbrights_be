@@ -1,6 +1,6 @@
-import { UpdateUserDto } from '@modules/auth/application/dto/update-user.dto';
+import { UpdateUserDto } from '@src/modules/user/application/dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '@src/modules/auth/domain/entities/user.entity';
+import { User } from '@src/modules/user/domain/entities/user.entity';
 import { UseCase } from '@src/shared/application/usecase.interface';
 import { Result } from '@src/shared/domain/result';
 import { Repository } from 'typeorm';

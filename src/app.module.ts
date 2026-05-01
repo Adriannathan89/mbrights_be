@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
+import { AppController } from './app.controller';
 
 dotenv.config();
 
@@ -17,5 +18,6 @@ dotenv.config();
             synchronize: true,
         }),
     ],
+    controllers: [AppController],
 })
 export class AppModule {}

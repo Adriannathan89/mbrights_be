@@ -1,6 +1,6 @@
-import { User, userProps } from '@modules/auth/domain/entities/user.entity';
+import { User, userProps } from '@src/modules/user/domain/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserAlreadyExistsError } from '@src/modules/auth/domain/errors/user.errors';
+import { UserAlreadyExistsError } from '@src/modules/user/domain/errors/user.errors';
 import { UseCase } from '@src/shared/application/usecase.interface';
 import { Result } from '@src/shared/domain/result';
 import * as bcrypt from 'bcrypt';

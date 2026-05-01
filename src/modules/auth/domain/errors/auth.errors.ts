@@ -5,9 +5,3 @@ export class InvalidCredentialsError extends DomainError {
         super('Invalid username or password.');
     }
 }
-
-export class UserAlreadyExistsError extends DomainError {
-    constructor(username: string) {
-        super(`User with username '${username}' already exists.`);
-    }
-}

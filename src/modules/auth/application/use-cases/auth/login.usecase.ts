@@ -1,11 +1,14 @@
 import { LoginDto } from '@modules/auth/application/dto/login.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '@src/modules/auth/domain/entities/user.entity';
-import { InvalidCredentialsError } from '@src/modules/auth/domain/errors/user.errors';
+import { User } from '@src/modules/user/domain/entities/user.entity';
+import { InvalidCredentialsError } from '@src/modules/auth/domain/errors/auth.errors';
 import { UseCase } from '@src/shared/application/usecase.interface';
 import { Result } from '@src/shared/domain/result';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { SessionPayload } from '@src/modules/auth/domain/entities/session.entity';
+import { Session } from '@src/modules/auth/domain/entities/session.entity';
 
 export class LoginUseCase implements UseCase<
     LoginDto,
@@ -14,40 +17,63 @@ export class LoginUseCase implements UseCase<
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
-    ) {}
+        private readonly jwtService: JwtService,
+    ) { }
 
     private async validateCredentials(
         username: string,
         password: string,
-    ): Promise<boolean> {
+    ): Promise<{ valid: boolean; user?: User }> {
         const user = await this.userRepository.findOne({ where: { username } });
         if (!user) {
-            return false;
+            return { valid: false };
         }
 
         const comparedPassword = bcrypt.compareSync(password, user.password);
-        return comparedPassword;
+        return { valid: comparedPassword, user };
     }
 
-    private generateAccessToken(username: string): string {
-        // Implement your access token generation logic here, such as using JWT.
-        return 'dummyAccessToken'; // Placeholder for generated access token
+    private storeRefreshToken(user: User, refreshToken: string): void {
+        const session = Session.create({
+            userId: user.id,
+            username: user.username,
+            refreshToken,
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        });
+
+        if (session.isOk()) {
+            this.userRepository.manager.save(session.getValue());
+        }
     }
 
-    private generateRefreshToken(username: string): string {
-        // Implement your refresh token generation logic here, such as using JWT or a random string.
-        return 'dummyRefreshToken'; // Placeholder for generated refresh token
+    private generateAccessToken(userId: string, username: string): string {
+        const payload: SessionPayload = { userId, username };
+        return this.jwtService.sign(payload, {
+            secret: process.env.JWT_SECRET,
+            expiresIn: "15m",
+        });
+    }
+
+    private generateRefreshToken(userId: string, username: string): string {
+        const payload: SessionPayload = { userId, username };
+        return this.jwtService.sign(payload, {
+            secret: process.env.JWT_SECRET,
+            expiresIn: "7d",
+        });
     }
 
     async execute(
         input: LoginDto,
     ): Promise<Result<{ accessToken: string; refreshToken: string }>> {
-        if (!(await this.validateCredentials(input.username, input.password))) {
+        const { valid, user } = await this.validateCredentials(input.username, input.password);
+        if (!valid || !user) {
             return Result.fail(new InvalidCredentialsError());
         }
 
-        const accessToken = this.generateAccessToken(input.username);
-        const refreshToken = this.generateRefreshToken(input.username);
+        const accessToken = this.generateAccessToken(user.id, user.username);
+        const refreshToken = this.generateRefreshToken(user.id, user.username);
+
+        this.storeRefreshToken(user, refreshToken);
 
         return Result.ok({ accessToken, refreshToken });
     }

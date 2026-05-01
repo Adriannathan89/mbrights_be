@@ -5,9 +5,14 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 export interface SessionProps {
     userId: string;
-    ipAddress: string;
+    username: string;
     refreshToken: string;
     expiresAt: Date;
+}
+
+export interface SessionPayload {
+    userId: string;
+    username: string;
 }
 
 @Entity({ name: 'sessions' })
@@ -16,16 +21,16 @@ export class Session extends BaseEntity<string> implements SessionProps {
         id: string,
         props: SessionProps = {
             userId: '',
-            ipAddress: '',
             refreshToken: '',
+            username: '',
             expiresAt: new Date(),
         },
     ) {
         super(id);
         this.id = id;
         this.userId = props.userId;
-        this.ipAddress = props.ipAddress;
         this.refreshToken = props.refreshToken;
+        this.username = props.username;
         this.expiresAt = props.expiresAt;
     }
     @PrimaryColumn({ name: 'id' })
@@ -34,8 +39,8 @@ export class Session extends BaseEntity<string> implements SessionProps {
     @Column({ name: 'user_id' })
     userId: string;
 
-    @Column({ name: 'ip_address' })
-    ipAddress: string;
+    @Column({ name: 'username' })
+    username: string;
 
     @Column({ name: 'refresh_token' })
     refreshToken: string;
