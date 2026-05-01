@@ -1,7 +1,13 @@
-import { DomainError } from "@src/shared/domain/domainError";
+import { DomainError } from '@src/shared/domain/domainError';
 
 export class UserAlreadyExistsError extends DomainError {
     constructor(username: string) {
         super(`User with username '${username}' already exists.`);
+    }
+}
+
+export class UserNotFoundError extends DomainError {
+    constructor(id: string) {
+        super(`User with id '${id}' not found.`);
     }
 }

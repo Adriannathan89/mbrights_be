@@ -1,14 +1,14 @@
 import { LoginDto } from '@modules/auth/application/dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '@src/modules/user/domain/entities/user.entity';
+import { SessionPayload } from '@src/modules/auth/domain/entities/session.entity';
+import { Session } from '@src/modules/auth/domain/entities/session.entity';
 import { InvalidCredentialsError } from '@src/modules/auth/domain/errors/auth.errors';
+import { User } from '@src/modules/user/domain/entities/user.entity';
 import { UseCase } from '@src/shared/application/usecase.interface';
 import { Result } from '@src/shared/domain/result';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
-import { JwtService } from '@nestjs/jwt';
-import { SessionPayload } from '@src/modules/auth/domain/entities/session.entity';
-import { Session } from '@src/modules/auth/domain/entities/session.entity';
 
 export class LoginUseCase implements UseCase<
     LoginDto,
@@ -18,7 +18,7 @@ export class LoginUseCase implements UseCase<
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
         private readonly jwtService: JwtService,
-    ) { }
+    ) {}
 
     private async validateCredentials(
         username: string,
@@ -50,7 +50,7 @@ export class LoginUseCase implements UseCase<
         const payload: SessionPayload = { userId, username };
         return this.jwtService.sign(payload, {
             secret: process.env.JWT_SECRET,
-            expiresIn: "15m",
+            expiresIn: '15m',
         });
     }
 
@@ -58,14 +58,17 @@ export class LoginUseCase implements UseCase<
         const payload: SessionPayload = { userId, username };
         return this.jwtService.sign(payload, {
             secret: process.env.JWT_SECRET,
-            expiresIn: "7d",
+            expiresIn: '7d',
         });
     }
 
     async execute(
         input: LoginDto,
     ): Promise<Result<{ accessToken: string; refreshToken: string }>> {
-        const { valid, user } = await this.validateCredentials(input.username, input.password);
+        const { valid, user } = await this.validateCredentials(
+            input.username,
+            input.password,
+        );
         if (!valid || !user) {
             return Result.fail(new InvalidCredentialsError());
         }

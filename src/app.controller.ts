@@ -1,9 +1,17 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, UseGuards } from '@nestjs/common';
 
-@Controller()
+import { JwtAuthGuard } from './modules/auth/settings/guards/jwt-auth.guard';
+
+@Controller('/health')
 export class AppController {
-    @Get("/health")
+    @Get('')
     getHealth() {
-        return { status: "OK" };
+        return { status: 'OK' };
+    }
+
+    @Get('/guard')
+    @UseGuards(JwtAuthGuard)
+    getHealthGuard() {
+        return { status: 'OK' };
     }
 }
