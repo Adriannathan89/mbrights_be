@@ -10,7 +10,6 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 
-import { Role } from './role.entity';
 import { UserRole } from './user_role.entity';
 
 export interface userProps {
@@ -22,10 +21,7 @@ export interface userProps {
 
 @Entity({ name: 'users' })
 export class User extends BaseEntity<string> implements userProps {
-    constructor(
-        id: string,
-        props: userProps = { username: '', password: '' },
-    ) {
+    constructor(id: string, props: userProps = { username: '', password: '' }) {
         super(id);
 
         this.id = id!;
@@ -65,10 +61,7 @@ export class User extends BaseEntity<string> implements userProps {
         return Result.ok(new User(id, props));
     }
 
-    public static reconstruct(
-        id: string,
-        props: userProps,
-    ): User {
+    public static reconstruct(id: string, props: userProps): User {
         return new User(id, props);
     }
 }

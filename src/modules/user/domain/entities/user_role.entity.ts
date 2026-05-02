@@ -1,7 +1,16 @@
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
-import { BaseEntity } from "@src/shared/domain/base.entity";
-import { User } from "./user.entity";
-import { Role } from "./role.entity";
+import { BaseEntity } from '@src/shared/domain/base.entity';
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    Index,
+    JoinColumn,
+    ManyToOne,
+    PrimaryColumn,
+} from 'typeorm';
+
+import { Role } from './role.entity';
+import { User } from './user.entity';
 
 interface UserRoleProps {
     userId: string;
@@ -23,14 +32,14 @@ export class UserRole extends BaseEntity<string> {
 
     @Column({ name: 'user_id' })
     userId: string;
-    
+
     @Column({ name: 'role_id' })
     roleId: string;
 
     @ManyToOne(() => User, (user) => user.userRoles, { onDelete: 'CASCADE' })
     @JoinColumn({
         name: 'user_id',
-         referencedColumnName: 'id',
+        referencedColumnName: 'id',
     })
     user!: User;
 

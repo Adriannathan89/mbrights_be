@@ -1,6 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, RoleEnum } from '@src/modules/user/domain/entities/role.entity';
 import { User, userProps } from '@src/modules/user/domain/entities/user.entity';
+import { UserRole } from '@src/modules/user/domain/entities/user_role.entity';
 import {
     MissingUserRoleError,
     UserAlreadyExistsError,
@@ -11,7 +12,6 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
 import { CreateUserDto } from '../../dto/create-user.dto';
-import { UserRole } from '@src/modules/user/domain/entities/user_role.entity';
 
 export class CreateUserUseCase implements UseCase<CreateUserDto, Result<User>> {
     constructor(
@@ -28,7 +28,10 @@ export class CreateUserUseCase implements UseCase<CreateUserDto, Result<User>> {
         return newPassword;
     }
 
-    private async createNewUserRole(userId: string, roleId: string): Promise<Result<UserRole>> {
+    private createNewUserRole(
+        userId: string,
+        roleId: string,
+    ): Result<UserRole> {
         const userRole = UserRole.create({ userId, roleId });
 
         return Result.ok(userRole);
@@ -53,9 +56,7 @@ export class CreateUserUseCase implements UseCase<CreateUserDto, Result<User>> {
         const userOrError = User.create(userProps);
 
         if (!userOrError.isOk()) {
-            return Result.fail(
-                userOrError.getError(),
-            );
+            return Result.fail(userOrError.getError());
         }
         const user = userOrError.getValue();
 
@@ -67,12 +68,10 @@ export class CreateUserUseCase implements UseCase<CreateUserDto, Result<User>> {
             return Result.fail(new UserAlreadyExistsError(user.username));
         }
 
-        const userRoleOrError = await this.createNewUserRole(user.id, userRole.id);
+        const userRoleOrError = this.createNewUserRole(user.id, userRole.id);
 
         if (!userRoleOrError.isOk()) {
-            return Result.fail(
-                userRoleOrError.getError(),
-            );
+            return Result.fail(userRoleOrError.getError());
         }
         const userRoleEntity = userRoleOrError.getValue();
 

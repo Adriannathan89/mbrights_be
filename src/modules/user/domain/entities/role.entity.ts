@@ -1,6 +1,7 @@
 import { BaseEntity } from '@src/shared/domain/base.entity';
 import { randomUUID } from 'crypto';
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+
 import { UserRole } from './user_role.entity';
 
 export enum RoleEnum {

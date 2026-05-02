@@ -4,11 +4,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@src/modules/user/domain/entities/user.entity';
 import { Repository } from 'typeorm';
 
+interface RequestUser {
+    id: string;
+    username: string;
+}
+
 @Injectable()
 export class RolesGuard implements CanActivate {
     constructor(
         private readonly reflector: Reflector,
-        @InjectRepository(User) private readonly userRepository: Repository<User>,
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>,
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -21,7 +27,9 @@ export class RolesGuard implements CanActivate {
             return true;
         }
 
-        const request = context.switchToHttp().getRequest();
+        const request = context
+            .switchToHttp()
+            .getRequest<{ user: RequestUser }>();
         const user = request.user;
 
         if (!user) {
@@ -33,11 +41,13 @@ export class RolesGuard implements CanActivate {
             relations: ['userRoles.role'],
         });
 
-        if (!userEntity || !userEntity.userRoles) {
+        if (!userEntity?.userRoles) {
             return false;
         }
 
-        const userRoles = userEntity.userRoles.map((userRole) => userRole.role.roleName.valueOf());
+        const userRoles = userEntity.userRoles.map((userRole) =>
+            userRole.role.roleName.valueOf(),
+        );
         return requiredRoles.some((role) => userRoles.includes(role));
     }
 }
