@@ -10,7 +10,8 @@ import {
     PrimaryColumn,
     UpdateDateColumn,
 } from 'typeorm';
-import { Role }  from './role.entity';
+
+import { Role } from './role.entity';
 
 export interface userProps {
     username: string;
@@ -21,7 +22,11 @@ export interface userProps {
 
 @Entity({ name: 'users' })
 export class User extends BaseEntity<string> implements userProps {
-    constructor(id: string, props: userProps = { username: '', password: ''}, Roles: Role[]) {
+    constructor(
+        id: string,
+        props: userProps = { username: '', password: '' },
+        Roles: Role[],
+    ) {
         super(id);
 
         this.id = id!;
@@ -54,17 +59,17 @@ export class User extends BaseEntity<string> implements userProps {
     })
     updatedAt!: Date;
 
-    @ManyToMany(() => Role, role => role.users)
+    @ManyToMany(() => Role, (role) => role.users)
     @JoinTable({
         name: 'user_roles',
         joinColumn: {
             name: 'user_id',
-            referencedColumnName: 'id'
+            referencedColumnName: 'id',
         },
         inverseJoinColumn: {
             name: 'role_id',
-            referencedColumnName: 'id'
-        }
+            referencedColumnName: 'id',
+        },
     })
     roles?: Role[];
 
@@ -73,7 +78,11 @@ export class User extends BaseEntity<string> implements userProps {
         return Result.ok(new User(id, props, roles));
     }
 
-    public static reconstruct(id: string, props: userProps, roles: Role[]): User {
+    public static reconstruct(
+        id: string,
+        props: userProps,
+        roles: Role[],
+    ): User {
         return new User(id, props, roles);
     }
 }

@@ -16,7 +16,7 @@ import { RefreshStrategy } from './settings/strategies/refresh.strategy';
     imports: [
         PassportModule,
         JwtModule.register({}),
-        TypeOrmModule.forFeature([Session, User]),
+        TypeOrmModule.forFeature([User, Session]),
     ],
     controllers: [AuthController],
     providers: [

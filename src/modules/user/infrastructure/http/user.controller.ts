@@ -11,7 +11,10 @@ import { CreateUserDto } from '../../application/dto/create-user.dto';
 import { CreateUserUseCase } from '../../application/usecase/user/create-user.usecase';
 import { UpdateUserUseCase } from '../../application/usecase/user/update-user.usecase';
 import { User } from '../../domain/entities/user.entity';
-import { MissingUserRoleError, UserAlreadyExistsError } from '../../domain/errors/user.errors';
+import {
+    MissingUserRoleError,
+    UserAlreadyExistsError,
+} from '../../domain/errors/user.errors';
 import { UserNotFoundError } from '../../domain/errors/user.errors';
 
 @Controller('user')

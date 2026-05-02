@@ -1,7 +1,8 @@
-import { BaseEntity } from "@src/shared/domain/base.entity";
-import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from "typeorm";
-import { User } from "./user.entity";
-import { randomUUID } from "crypto";
+import { BaseEntity } from '@src/shared/domain/base.entity';
+import { randomUUID } from 'crypto';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
+
+import { User } from './user.entity';
 
 export enum RoleEnum {
     USER = 'USER',
@@ -13,7 +14,7 @@ export interface RoleProps {
     roleName: RoleEnum;
 }
 
-@Entity({name: "roles"})
+@Entity({ name: 'roles' })
 export class Role extends BaseEntity<string> implements RoleProps {
     constructor(props: RoleProps = { roleName: RoleEnum.USER }) {
         const id = randomUUID();
@@ -28,17 +29,17 @@ export class Role extends BaseEntity<string> implements RoleProps {
     @Column({ type: 'enum', enum: RoleEnum, name: 'role_name', unique: true })
     roleName: RoleEnum;
 
-    @ManyToMany(() => User, user => user.roles)
+    @ManyToMany(() => User, (user) => user.roles)
     @JoinTable({
         name: 'user_roles',
         joinColumn: {
             name: 'role_id',
-            referencedColumnName: 'id'
+            referencedColumnName: 'id',
         },
         inverseJoinColumn: {
             name: 'user_id',
-            referencedColumnName: 'id'
-        }
+            referencedColumnName: 'id',
+        },
     })
     users?: User[];
 }
