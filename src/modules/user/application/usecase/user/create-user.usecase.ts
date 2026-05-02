@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
 import { CreateUserDto } from '../../dto/create-user.dto';
+import { UserRole } from '@src/modules/user/domain/entities/user_role.entity';
 
 export class CreateUserUseCase implements UseCase<CreateUserDto, Result<User>> {
     constructor(
@@ -18,11 +19,19 @@ export class CreateUserUseCase implements UseCase<CreateUserDto, Result<User>> {
         private readonly userRepository: Repository<User>,
         @InjectRepository(Role)
         private readonly roleRepository: Repository<Role>,
+        @InjectRepository(UserRole)
+        private readonly userRoleRepository: Repository<UserRole>,
     ) {}
 
     private hashPassword(password: string): string {
         const newPassword: string = bcrypt.hashSync(password, 10);
         return newPassword;
+    }
+
+    private async createNewUserRole(userId: string, roleId: string): Promise<Result<UserRole>> {
+        const userRole = UserRole.create({ userId, roleId });
+
+        return Result.ok(userRole);
     }
 
     async execute(input: CreateUserDto): Promise<Result<User>> {
@@ -41,15 +50,15 @@ export class CreateUserUseCase implements UseCase<CreateUserDto, Result<User>> {
             password: hashedPassword,
         };
 
-        const userOrError = User.create(userProps, [userRole]);
+        const userOrError = User.create(userProps);
 
         if (!userOrError.isOk()) {
             return Result.fail(
-                userOrError.getError() ?? 'Failed to create user',
+                userOrError.getError(),
             );
         }
-
         const user = userOrError.getValue();
+
         const existingUser = await this.userRepository.findOne({
             where: { username: user.username },
         });
@@ -58,7 +67,17 @@ export class CreateUserUseCase implements UseCase<CreateUserDto, Result<User>> {
             return Result.fail(new UserAlreadyExistsError(user.username));
         }
 
+        const userRoleOrError = await this.createNewUserRole(user.id, userRole.id);
+
+        if (!userRoleOrError.isOk()) {
+            return Result.fail(
+                userRoleOrError.getError(),
+            );
+        }
+        const userRoleEntity = userRoleOrError.getValue();
+
         await this.userRepository.save(user);
+        await this.userRoleRepository.save(userRoleEntity);
         return Result.ok(user);
     }
 }

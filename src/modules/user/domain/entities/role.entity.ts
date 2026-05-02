@@ -1,8 +1,7 @@
 import { BaseEntity } from '@src/shared/domain/base.entity';
 import { randomUUID } from 'crypto';
-import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
-
-import { User } from './user.entity';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import { UserRole } from './user_role.entity';
 
 export enum RoleEnum {
     USER = 'USER',
@@ -29,17 +28,6 @@ export class Role extends BaseEntity<string> implements RoleProps {
     @Column({ type: 'enum', enum: RoleEnum, name: 'role_name', unique: true })
     roleName: RoleEnum;
 
-    @ManyToMany(() => User, (user) => user.roles)
-    @JoinTable({
-        name: 'user_roles',
-        joinColumn: {
-            name: 'role_id',
-            referencedColumnName: 'id',
-        },
-        inverseJoinColumn: {
-            name: 'user_id',
-            referencedColumnName: 'id',
-        },
-    })
-    users?: User[];
+    @OneToMany(() => UserRole, (userRole) => userRole.role)
+    userRoles?: UserRole[];
 }

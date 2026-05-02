@@ -6,9 +6,10 @@ import { UpdateUserUseCase } from './application/usecase/user/update-user.usecas
 import { Role } from './domain/entities/role.entity';
 import { User } from './domain/entities/user.entity';
 import { UserController } from './infrastructure/http/user.controller';
+import { UserRole } from './domain/entities/user_role.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([User, Role])],
+    imports: [TypeOrmModule.forFeature([User, Role, UserRole])],
     controllers: [UserController],
     providers: [CreateUserUseCase, UpdateUserUseCase],
 })

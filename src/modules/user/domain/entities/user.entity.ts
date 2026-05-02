@@ -5,13 +5,13 @@ import {
     Column,
     CreateDateColumn,
     Entity,
-    JoinTable,
-    ManyToMany,
+    OneToMany,
     PrimaryColumn,
     UpdateDateColumn,
 } from 'typeorm';
 
 import { Role } from './role.entity';
+import { UserRole } from './user_role.entity';
 
 export interface userProps {
     username: string;
@@ -25,14 +25,12 @@ export class User extends BaseEntity<string> implements userProps {
     constructor(
         id: string,
         props: userProps = { username: '', password: '' },
-        Roles: Role[],
     ) {
         super(id);
 
         this.id = id!;
         this.username = props.username;
         this.password = props.password;
-        this.roles = Roles;
     }
 
     @PrimaryColumn({ name: 'id' })
@@ -59,30 +57,18 @@ export class User extends BaseEntity<string> implements userProps {
     })
     updatedAt!: Date;
 
-    @ManyToMany(() => Role, (role) => role.users)
-    @JoinTable({
-        name: 'user_roles',
-        joinColumn: {
-            name: 'user_id',
-            referencedColumnName: 'id',
-        },
-        inverseJoinColumn: {
-            name: 'role_id',
-            referencedColumnName: 'id',
-        },
-    })
-    roles?: Role[];
+    @OneToMany(() => UserRole, (userRole) => userRole.user)
+    userRoles?: UserRole[];
 
-    public static create(props: userProps, roles: Role[]): Result<User> {
+    public static create(props: userProps): Result<User> {
         const id = randomUUID();
-        return Result.ok(new User(id, props, roles));
+        return Result.ok(new User(id, props));
     }
 
     public static reconstruct(
         id: string,
         props: userProps,
-        roles: Role[],
     ): User {
-        return new User(id, props, roles);
+        return new User(id, props);
     }
 }
