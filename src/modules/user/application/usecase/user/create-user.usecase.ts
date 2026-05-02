@@ -1,17 +1,20 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { User, userProps } from '@src/modules/user/domain/entities/user.entity';
-import { UserAlreadyExistsError } from '@src/modules/user/domain/errors/user.errors';
+import { MissingUserRoleError, UserAlreadyExistsError } from '@src/modules/user/domain/errors/user.errors';
 import { UseCase } from '@src/shared/application/usecase.interface';
 import { Result } from '@src/shared/domain/result';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
 import { CreateUserDto } from '../../dto/create-user.dto';
+import { Role, RoleEnum } from '@src/modules/user/domain/entities/role.entity';
 
 export class CreateUserUseCase implements UseCase<CreateUserDto, Result<User>> {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+        @InjectRepository(Role)
+        private readonly roleRepository: Repository<Role>
     ) {}
 
     private hashPassword(password: string): string {
@@ -22,12 +25,22 @@ export class CreateUserUseCase implements UseCase<CreateUserDto, Result<User>> {
     async execute(input: CreateUserDto): Promise<Result<User>> {
         const hashedPassword = this.hashPassword(input.password);
 
+        const userRole = await this.roleRepository.findOne({
+            where: { roleName: RoleEnum.USER },
+        });
+
+        if (!userRole) {
+            return Result.fail(new MissingUserRoleError());
+        }
+
+        const roleName = userRole.roleName;
+
         const userProps: userProps = {
             username: input.username,
             password: hashedPassword,
         };
 
-        const userOrError = User.create(userProps);
+        const userOrError = User.create(userProps, [userRole]);
 
         if (!userOrError.isOk()) {
             return Result.fail(

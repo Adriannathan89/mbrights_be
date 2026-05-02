@@ -11,7 +11,7 @@ import { CreateUserDto } from '../../application/dto/create-user.dto';
 import { CreateUserUseCase } from '../../application/usecase/user/create-user.usecase';
 import { UpdateUserUseCase } from '../../application/usecase/user/update-user.usecase';
 import { User } from '../../domain/entities/user.entity';
-import { UserAlreadyExistsError } from '../../domain/errors/user.errors';
+import { MissingUserRoleError, UserAlreadyExistsError } from '../../domain/errors/user.errors';
 import { UserNotFoundError } from '../../domain/errors/user.errors';
 
 @Controller('user')
@@ -26,8 +26,11 @@ export class UserController {
         const res = await this.createUserUseCase.execute(userInput);
 
         if (res.isFailure()) {
-            if (res.getError() instanceof UserAlreadyExistsError) {
-                throw new BadRequestException('User already exists');
+            const error = res.getError();
+            if (error instanceof UserAlreadyExistsError) {
+                throw new BadRequestException(error.message);
+            } else if (error instanceof MissingUserRoleError) {
+                throw new BadRequestException(error.message);
             }
         }
 
@@ -42,8 +45,9 @@ export class UserController {
         const res = await this.updateUserUseCase.execute({ id, ...userInput });
 
         if (res.isFailure()) {
-            if (res.getError() instanceof UserNotFoundError) {
-                throw new BadRequestException('User not found');
+            const error = res.getError();
+            if (error instanceof UserNotFoundError) {
+                throw new BadRequestException(error.message);
             }
         }
 

@@ -11,3 +11,9 @@ export class UserNotFoundError extends DomainError {
         super(`User with id '${id}' not found.`);
     }
 }
+
+export class MissingUserRoleError extends DomainError {
+    constructor() {
+        super(`Default USER role not found.`);
+    }
+}
