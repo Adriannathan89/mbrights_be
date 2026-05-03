@@ -5,9 +5,12 @@ import {
     Column,
     CreateDateColumn,
     Entity,
+    OneToMany,
     PrimaryColumn,
     UpdateDateColumn,
 } from 'typeorm';
+
+import { UserRole } from './user_role.entity';
 
 export interface userProps {
     username: string;
@@ -49,6 +52,9 @@ export class User extends BaseEntity<string> implements userProps {
         onUpdate: 'CURRENT_TIMESTAMP',
     })
     updatedAt!: Date;
+
+    @OneToMany(() => UserRole, (userRole) => userRole.user)
+    userRoles?: UserRole[];
 
     public static create(props: userProps): Result<User> {
         const id = randomUUID();

@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 
 import { AppController } from './app.controller';
 import { AuthModule } from './modules/auth/auth.module';
+import { User } from './modules/user/domain/entities/user.entity';
 import { UserModule } from './modules/user/user.module';
 
 dotenv.config();
@@ -20,6 +21,7 @@ dotenv.config();
             autoLoadEntities: true,
             synchronize: true,
         }),
+        TypeOrmModule.forFeature([User]),
         UserModule,
         AuthModule,
     ],
