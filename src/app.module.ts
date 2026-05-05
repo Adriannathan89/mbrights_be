@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 
 import { AppController } from './app.controller';
 import { AuthModule } from './modules/auth/auth.module';
+import { MbgModule } from './modules/mbg/mbg.module';
 import { User } from './modules/user/domain/entities/user.entity';
 import { UserModule } from './modules/user/user.module';
 
@@ -24,6 +25,7 @@ dotenv.config();
         TypeOrmModule.forFeature([User]),
         UserModule,
         AuthModule,
+        MbgModule,
     ],
     controllers: [AppController],
 })
